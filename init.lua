@@ -86,6 +86,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 
 -- Set <space> as the leader key
 -- See `:help mapleader`
+-- Still don't understand the local leader stuff yet
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
@@ -102,7 +103,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -201,6 +202,54 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.highlight.on_yank()
+  end,
+})
+
+vim.api.nvim_create_autocmd('BufReadPost', {
+  desc = 'Restore Cursor to last place in file',
+  group = vim.api.nvim_create_augroup('jump_last_position', { clear = true }),
+  callback = function()
+    local row, col = unpack(vim.api.nvim_buf_get_mark(0, '"'))
+    if { row, col } ~= { 0, 0 } then
+      vim.api.nvim_win_set_cursor(0, { row, 0 })
+    end
+  end,
+})
+
+--------------------------------------------------------------------------------
+-- SETUP BASIC PYTHON-RELATED OPTIONS
+-- The filetype-autocmd runs a function when opening a file with the filetype
+-- "python". This method allows you to make filetype-specific configurations. In
+-- there, you have to use `opt_local` instead of `opt` to limit the changes to
+-- just that buffer. (As an alternative to using an autocmd, you can also put those
+-- configurations into a file `/after/ftplugin/{filetype}.lua` in your
+-- nvim-directory.)
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'python', -- filetype for which to run the autocmd
+  callback = function()
+    -- use pep8 standards
+    vim.opt_local.expandtab = true
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.tabstop = 4
+    vim.opt_local.softtabstop = 4
+
+    -- folds based on indentation https://neovim.io/doc/user/fold.html#fold-indent
+    -- if you are a heavy user of folds, consider using `nvim-ufo`
+    vim.opt_local.foldmethod = 'indent'
+
+    local iabbrev = function(lhs, rhs)
+      vim.keymap.set('ia', lhs, rhs, { buffer = true })
+    end
+    -- automatically capitalize boolean values. Useful if you come from a
+    -- different language, and lowercase them out of habit.
+    iabbrev('true', 'True')
+    iabbrev('false', 'False')
+
+    -- in the same way, we can fix habits regarding comments or None
+    iabbrev('--', '#')
+    iabbrev('null', 'None')
+    iabbrev('none', 'None')
+    iabbrev('nil', 'None')
   end,
 })
 
@@ -324,7 +373,16 @@ require('lazy').setup({
       },
     },
   },
-
+  {
+    'amitds1997/remote-nvim.nvim',
+    version = '*', -- Pin to GitHub releases
+    dependencies = {
+      'nvim-lua/plenary.nvim', -- For standard functions
+      'MunifTanjim/nui.nvim', -- To build the plugin UI
+      'nvim-telescope/telescope.nvim', -- For picking b/w different remote methods
+    },
+    config = true,
+  },
   -- NOTE: Plugins can specify dependencies.
   --
   -- The dependencies are proper plugin specifications as well - anything
@@ -605,9 +663,9 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
-        -- clangd = {},
+        clangd = {},
         -- gopls = {},
-        -- pyright = {},
+        pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
         --
@@ -700,7 +758,7 @@ require('lazy').setup({
       formatters_by_ft = {
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
+        python = { 'isort', 'black' },
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
@@ -824,6 +882,59 @@ require('lazy').setup({
     end,
   },
 
+  -----------------------------------------------------------------------------
+  -- PYTHON REPL
+  -- A basic REPL that opens up as a horizontal split
+  -- - use `<leader>i` to toggle the REPL
+  -- - use `<leader>I` to restart the REPL
+  -- - `+` serves as the "send to REPL" operator. That means we can use `++`
+  -- to send the current line to the REPL, and `+j` to send the current and the
+  -- following line to the REPL, like we would do with other vim operators.
+  {
+    'Vigemus/iron.nvim',
+    keys = {
+      { '<leader>i', vim.cmd.IronRepl, desc = '󱠤 Toggle REPL' },
+      { '<leader>I', vim.cmd.IronRestart, desc = '󱠤 Restart REPL' },
+
+      -- these keymaps need no right-hand-side, since that is defined by the
+      -- plugin config further below
+      { '+', mode = { 'n', 'x' }, desc = '󱠤 Send-to-REPL Operator' },
+      { '++', desc = '󱠤 Send Line to REPL' },
+    },
+
+    -- since irons's setup call is `require("iron.core").setup`, instead of
+    -- `require("iron").setup` like other plugins would do, we need to tell
+    -- lazy.nvim which module to via the `main` key
+    main = 'iron.core',
+
+    opts = {
+      keymaps = {
+        send_line = '++',
+        visual_send = '+',
+        send_motion = '+',
+      },
+      config = {
+        -- This defines how the repl is opened. Here, we set the REPL window
+        -- to open in a horizontal split to the bottom, with a height of 10.
+        repl_open_cmd = 'horizontal bot 10 split',
+
+        -- This defines which binary to use for the REPL. If `ipython` is
+        -- available, it will use `ipython`, otherwise it will use `python3`.
+        -- since the python repl does not play well with indents, it's
+        -- preferable to use `ipython` or `bypython` here.
+        -- (see: https://github.com/Vigemus/iron.nvim/issues/348)
+        repl_definition = {
+          python = {
+            command = function()
+              local ipythonAvailable = vim.fn.executable 'ipython' == 1
+              local binary = ipythonAvailable and 'ipython' or 'python3'
+              return { binary }
+            end,
+          },
+        },
+      },
+    },
+  },
   { -- You can easily change to a different colorscheme.
     -- Change the name of the colorscheme plugin below, and then
     -- change the command in the config to whatever the name of that colorscheme is.
