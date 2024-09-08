@@ -216,6 +216,22 @@ vim.api.nvim_create_autocmd('BufReadPost', {
   end,
 })
 
+-- Setup options from lua files
+--
+local group = vim.api.nvim_create_augroup('DefaultFileSettings', { clear = true })
+
+vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Set defaults for lua files', -- should this be in after/?
+  group = group,
+  pattern = 'lua', -- file type to apply settings to
+  callback = function()
+    vim.opt_local.expandtab = true
+    vim.opt_local.shiftwidth = 2
+    vim.opt_local.tabstop = 2
+    vim.opt_local.softtabstop = 2
+  end,
+})
+
 --------------------------------------------------------------------------------
 -- SETUP BASIC PYTHON-RELATED OPTIONS
 -- The filetype-autocmd runs a function when opening a file with the filetype
@@ -225,6 +241,8 @@ vim.api.nvim_create_autocmd('BufReadPost', {
 -- configurations into a file `/after/ftplugin/{filetype}.lua` in your
 -- nvim-directory.)
 vim.api.nvim_create_autocmd('FileType', {
+  desc = 'Set PEP defaults for python files',
+  group = group,
   pattern = 'python', -- filetype for which to run the autocmd
   callback = function()
     -- use pep8 standards
@@ -698,13 +716,20 @@ require('lazy').setup({
       --    :Mason
       --
       --  You can press `g?` for help in this menu.
-      require('mason').setup()
+      require('mason').setup {
+        log_level = vim.log.levels.DEBUG,
+      }
 
       -- You can add other tools here that you want Mason to install
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'ruff', -- linter for python (includes flake8, pep8, etc.)
+        'debugpy', -- debugger
+        'black', -- formatter
+        'isort', -- organize imports
+        'taplo', -- LSP for toml (for pyproject.toml files)
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -952,7 +977,6 @@ require('lazy').setup({
       vim.cmd.hi 'Comment gui=none'
     end,
   },
-
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
 
@@ -1034,7 +1058,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
-
+  require 'custom.plugins.oil',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -1062,6 +1086,5 @@ require('lazy').setup({
     },
   },
 })
-
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
