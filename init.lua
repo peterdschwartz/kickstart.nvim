@@ -158,6 +158,9 @@ vim.opt.cursorline = true
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
 
+-- Turn Off .swp files !
+vim.opt.swapfile = false
+
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
@@ -190,6 +193,7 @@ vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left wind
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
+vim.keymap.set('v', '<leader>p', '"_dP', { desc = 'Paste backwards, keep text in register' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -232,6 +236,10 @@ vim.api.nvim_create_autocmd('FileType', {
   end,
 })
 
+vim.api.nvim_create_autocmd({ 'BufRead', 'BufNewFile' }, {
+  pattern = { '*.tpp' },
+  command = 'set filetype=cpp',
+})
 --------------------------------------------------------------------------------
 -- SETUP BASIC PYTHON-RELATED OPTIONS
 -- The filetype-autocmd runs a function when opening a file with the filetype
@@ -475,7 +483,7 @@ require('lazy').setup({
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
 
-      -- See `:help telescope.builtin`
+      -- See `:help telescope.builtin
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
@@ -492,7 +500,7 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>/', function()
         -- You can pass additional configuration to Telescope to change the theme, layout, etc.
         builtin.current_buffer_fuzzy_find(require('telescope.themes').get_dropdown {
-          winblend = 10,
+          winblend = 0,
           previewer = false,
         })
       end, { desc = '[/] Fuzzily search in current buffer' })
@@ -785,7 +793,7 @@ require('lazy').setup({
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
         --
-        fortran = { 'fprettify' },
+        -- fortran = { 'fprettify' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
       },
@@ -973,7 +981,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'tokyonight-night'
+      vim.cmd.colorscheme 'catppuccin-mocha'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -1062,6 +1070,9 @@ require('lazy').setup({
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
   require 'custom.plugins.oil',
   require 'custom.plugins.harpoon',
+  require 'custom.plugins.vim-tmux-navigator',
+  require 'custom.plugins.Catppuccin',
+  require 'custom.plugins.telescope-undo',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
