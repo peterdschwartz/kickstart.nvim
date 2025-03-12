@@ -194,6 +194,9 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('v', '<leader>p', '"_dP', { desc = 'Paste backwards, keep text in register' })
+vim.keymap.set('n', 'c', '"_c', { noremap = true, silent = true })
+vim.keymap.set('n', 'C', '"_C', { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>sb', ':windo set scrollbind!<CR>', { noremap = true, silent = true })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -270,12 +273,6 @@ vim.api.nvim_create_autocmd('FileType', {
     -- different language, and lowercase them out of habit.
     iabbrev('true', 'True')
     iabbrev('false', 'False')
-
-    -- in the same way, we can fix habits regarding comments or None
-    iabbrev('--', '#')
-    iabbrev('null', 'None')
-    iabbrev('none', 'None')
-    iabbrev('nil', 'None')
   end,
 })
 
@@ -702,6 +699,9 @@ require('lazy').setup({
         -- tsserver = {},
         --
 
+        zls = {
+          cmd = { '/usr/local/bin/zls' },
+        },
         lua_ls = {
           -- cmd = {...},
           -- filetypes = { ...},
@@ -792,6 +792,7 @@ require('lazy').setup({
         lua = { 'stylua' },
         -- Conform can also run multiple formatters sequentially
         python = { 'isort', 'black' },
+        zig = { 'zig fmt' },
         --
         -- fortran = { 'fprettify' },
         -- You can use 'stop_after_first' to run the first available formatter from the list
@@ -1073,6 +1074,7 @@ require('lazy').setup({
   require 'custom.plugins.vim-tmux-navigator',
   require 'custom.plugins.Catppuccin',
   require 'custom.plugins.telescope-undo',
+  require 'custom.plugins.copilot',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
