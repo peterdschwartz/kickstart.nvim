@@ -11,3 +11,11 @@ vim.api.nvim_create_autocmd({ 'FileType' }, {
   end,
 })
 vim.api.nvim_set_keymap('n', '<leader>f', ':%!fprettify<CR>', { noremap = true, silent = true })
+
+require('lspconfig').fortls.setup {
+  settings = {
+    fortls = {
+      include_dirs = { '/usr/include', '~/.local/include', '~/.local/hdf5/include' },
+    },
+  },
+}
