@@ -88,6 +88,7 @@ P.S. You can delete this when you're done too. It's your config now! :)
 -- See `:help mapleader`
 -- Still don't understand the local leader stuff yet
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
+vim.g.python3_host_prog = '/usr/bin/py'
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
@@ -916,6 +917,21 @@ require('lazy').setup({
       }
     end,
   },
+  {
+    'ellisonleao/glow.nvim',
+    config = true,
+    cmd = 'Glow',
+  },
+
+  {
+    dir = vim.fn.stdpath 'config' .. '/lua/custom/plugins/',
+    name = 'emoji-table',
+    lazy = false,
+    config = function()
+      local emoji_table = require 'custom.plugins.emoji-table'
+      vim.api.nvim_create_user_command('RangeEmoji', emoji_table.range_emoji_picker, {})
+    end,
+  },
 
   -----------------------------------------------------------------------------
   -- PYTHON REPL
@@ -1034,7 +1050,7 @@ require('lazy').setup({
     main = 'nvim-treesitter.configs', -- Sets main module to use for opts
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'mlir' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -1042,10 +1058,26 @@ require('lazy').setup({
         -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
         --  If you are experiencing weird indenting issues, add the language to
         --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
+        additional_vim_regex_highlighting = { 'ruby', 'fortran' },
       },
-      indent = { enable = true, disable = { 'ruby' } },
+      indent = { enable = true, disable = { 'ruby', 'fortran' } },
     },
+    config = function(_, opts)
+      -- 🌱 Register the local tree-sitter grammar for MLIR
+      local parser_config = require('nvim-treesitter.parsers').get_parser_configs()
+      parser_config.mlir = {
+        install_info = {
+          -- 🔁 Change this path if your LLVM clone is elsewhere
+          url = vim.fn.expand '~/.llvm/llvm-project/mlir/utils/tree-sitter-mlir',
+          files = { 'src/parser.c' },
+          branch = 'release/20.x',
+        },
+        filetype = 'mlir',
+      }
+
+      -- 🚀 Load the config normally
+      require('nvim-treesitter.configs').setup(opts)
+    end,
     -- There are additional nvim-treesitter modules that you can use to interact
     -- with nvim-treesitter. You should go explore a few and see what interests you:
     --
@@ -1069,12 +1101,14 @@ require('lazy').setup({
   require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
   -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+
+  require 'custom.plugins.mlir',
   require 'custom.plugins.oil',
   require 'custom.plugins.harpoon',
   require 'custom.plugins.vim-tmux-navigator',
   require 'custom.plugins.Catppuccin',
   require 'custom.plugins.telescope-undo',
-  require 'custom.plugins.copilot',
+  -- require 'custom.plugins.copilot',
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
   --
@@ -1102,5 +1136,9 @@ require('lazy').setup({
     },
   },
 })
+
+require('lspconfig').fortls.setup(require 'lsp.fortls')
+require 'lsp.mlir'
+require 'lsp.zig'
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
