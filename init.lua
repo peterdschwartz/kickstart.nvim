@@ -299,22 +299,43 @@ vim.opt.rtp:prepend(lazypath)
 --  To update plugins you can run
 --    :Lazy update
 --
--- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  --
+  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
+  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
+  -- { import = 'custom' },
+  {
+    name = 'emoji-table',
+    dir = vim.fn.stdpath 'config' .. '/lua/custom/plugins/',
+    lazy = false,
+    config = function()
+      local emoji_table = require 'custom.plugins.emoji-table'
+      vim.api.nvim_create_user_command('RangeEmoji', emoji_table.range_emoji_picker, {})
+    end,
+  },
+  -- {
+  --   dir = vim.fn.stdpath 'config' .. '/lua/custom/plugins/',
+  --   name = 'journal',
+  --   lazy = false,
+  --   config = function()
+  --     local journal = require 'custom.plugins.journal'
+  --     -- journal.check_journal()
+  --     vim.api.nvim_create_autocmd('BufWritePre', {
+  --       pattern = { vim.fn.expand '~/Documents/.journal.md' },
+  --       callback = function()
+  --         journal.update_journal_timestamp()
+  --       end,
+  --     })
+  --     vim.api.nvim_create_autocmd('BufWritePre', {
+  --       pattern = { vim.fn.expand '~/Documents/.journal.md' },
+  --       callback = function()
+  --         journal.update_journal_timestamp()
+  --       end,
+  --     })
+  --   end,
+  -- },
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
-  -- NOTE: Plugins can also be added by using a table,
-  -- with the first argument being the link and the following
-  -- keys can be used to configure plugin behavior/loading/etc.
-  --
-  -- Use `opts = {}` to force a plugin to be loaded.
-  --
-
-  -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`. This is equivalent to the following Lua:
-  --    require('gitsigns').setup({ ... })
-  --
   -- See `:help gitsigns` to understand what the configuration keys do
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
@@ -923,16 +944,6 @@ require('lazy').setup({
     cmd = 'Glow',
   },
 
-  {
-    dir = vim.fn.stdpath 'config' .. '/lua/custom/plugins/',
-    name = 'emoji-table',
-    lazy = false,
-    config = function()
-      local emoji_table = require 'custom.plugins.emoji-table'
-      vim.api.nvim_create_user_command('RangeEmoji', emoji_table.range_emoji_picker, {})
-    end,
-  },
-
   -----------------------------------------------------------------------------
   -- PYTHON REPL
   -- A basic REPL that opens up as a horizontal split
@@ -1086,15 +1097,7 @@ require('lazy').setup({
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
   },
 
-  -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
-  -- init.lua. If you want these files, they are in the repository, so you can just download them and
-  -- place them in the correct locations.
-
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
-  --
-  --  Here are some example plugins that I've included in the Kickstart repository.
-  --  Uncomment any of the lines below to enable them (you will need to restart nvim).
-  --
   require 'kickstart.plugins.debug',
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
@@ -1109,12 +1112,6 @@ require('lazy').setup({
   require 'custom.plugins.Catppuccin',
   require 'custom.plugins.telescope-undo',
   -- require 'custom.plugins.copilot',
-  -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
-  --    This is the easiest way to modularize your config.
-  --
-  --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
-  --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
@@ -1140,5 +1137,9 @@ require('lazy').setup({
 require('lspconfig').fortls.setup(require 'lsp.fortls')
 require 'lsp.mlir'
 require 'lsp.zig'
+local journal = require 'custom.plugins.journal'
+journal.check_journal()
+vim.api.nvim_create_user_command('JournalUpdate', journal.update_journal_timestamp, {})
+vim.api.nvim_create_user_command('JournalOpen', journal.open_journal, {})
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
