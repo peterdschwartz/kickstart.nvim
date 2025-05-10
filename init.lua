@@ -190,6 +190,8 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 --  Use CTRL+<hjkl> to switch between windows
 --
 --  See `:help wincmd` for a list of all window commands
+--
+
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
@@ -198,34 +200,6 @@ vim.keymap.set('v', '<leader>p', '"_dP', { desc = 'Paste backwards, keep text in
 vim.keymap.set('n', 'c', '"_c', { noremap = true, silent = true })
 vim.keymap.set('n', 'C', '"_C', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>sb', ':windo set scrollbind!<CR>', { noremap = true, silent = true })
-
-vim.keymap.set('v', '<leader>a', function()
-  -- Prompt user for regex pattern
-  local regex = vim.fn.input 'Regex: '
-  if regex == '' then
-    print 'Cancelled.'
-    return
-  end
-
-  -- Clear register a
-  vim.fn.setreg('a', '')
-
-  -- Get visual selection range
-  local start_pos = vim.fn.getpos("'<")[2]
-  local end_pos = vim.fn.getpos("'>")[2]
-
-  -- Loop through selected lines
-  for lnum = start_pos, end_pos do
-    local line = vim.fn.getline(lnum)
-    for match in string.gmatch(line, regex) do
-      -- Append each match to register a with newline
-      local current = vim.fn.getreg 'a'
-      vim.fn.setreg('a', current .. match .. '\n')
-    end
-  end
-
-  print 'Matches collected in register a.'
-end, { desc = 'Collect regex matches in register a from visual selection' })
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
