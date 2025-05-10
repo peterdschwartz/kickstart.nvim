@@ -199,6 +199,34 @@ vim.keymap.set('n', 'c', '"_c', { noremap = true, silent = true })
 vim.keymap.set('n', 'C', '"_C', { noremap = true, silent = true })
 vim.keymap.set('n', '<leader>sb', ':windo set scrollbind!<CR>', { noremap = true, silent = true })
 
+vim.keymap.set('v', '<leader>a', function()
+  -- Prompt user for regex pattern
+  local regex = vim.fn.input 'Regex: '
+  if regex == '' then
+    print 'Cancelled.'
+    return
+  end
+
+  -- Clear register a
+  vim.fn.setreg('a', '')
+
+  -- Get visual selection range
+  local start_pos = vim.fn.getpos("'<")[2]
+  local end_pos = vim.fn.getpos("'>")[2]
+
+  -- Loop through selected lines
+  for lnum = start_pos, end_pos do
+    local line = vim.fn.getline(lnum)
+    for match in string.gmatch(line, regex) do
+      -- Append each match to register a with newline
+      local current = vim.fn.getreg 'a'
+      vim.fn.setreg('a', current .. match .. '\n')
+    end
+  end
+
+  print 'Matches collected in register a.'
+end, { desc = 'Collect regex matches in register a from visual selection' })
+
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
 
@@ -1141,5 +1169,9 @@ local journal = require 'custom.plugins.journal'
 journal.check_journal()
 vim.api.nvim_create_user_command('JournalUpdate', journal.update_journal_timestamp, {})
 vim.api.nvim_create_user_command('JournalOpen', journal.open_journal, {})
+
+local regex_select = require 'custom.plugins.regex-select.regex-multi-select'
+vim.api.nvim_create_user_command('RegexSelect', regex_select.regex_live_preview, { range = true })
+
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
