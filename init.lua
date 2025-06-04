@@ -161,6 +161,7 @@ vim.opt.scrolloff = 10
 
 -- Turn Off .swp files !
 vim.opt.swapfile = false
+vim.g.loaded_matchparen = 1
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -1074,6 +1075,7 @@ require('lazy').setup({
         additional_vim_regex_highlighting = { 'ruby', 'fortran' },
       },
       indent = { enable = true, disable = { 'ruby', 'fortran' } },
+      matchup = { enable = true },
     },
     config = function(_, opts)
       -- 🌱 Register the local tree-sitter grammar for MLIR
@@ -1097,6 +1099,12 @@ require('lazy').setup({
     --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
     --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
     --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+  },
+
+  {
+    'andymass/vim-matchup',
+    lazy = true,
+    event = { 'BufReadPost', 'BufNewFile' },
   },
 
   -- NOTE: Next step on your Neovim journey: Add/Configure additional plugins for Kickstart
