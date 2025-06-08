@@ -1,7 +1,7 @@
 local M = {}
 
 M.journal_path = vim.fn.expand '~/Documents/.journal.md'
-M.interval = 60 * 60 -- seconds
+M.interval = 4 * 60 * 60 -- seconds
 
 function M.get_last_edit_time()
   local file = io.open(M.journal_path, 'r')
