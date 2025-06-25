@@ -27,6 +27,9 @@ end
 
 function M.check_journal()
   local last_edit = M.get_last_edit_time()
+  if last_edit == nil then
+    return nil
+  end
   local now = os.time()
 
   if not last_edit or (now - last_edit) > M.interval then
