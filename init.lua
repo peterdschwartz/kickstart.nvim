@@ -122,6 +122,16 @@ local greek_map = {
 --     return string.rep('<BS>', #name + 1) .. char .. ' '
 --   end, { expr = true, noremap = true })
 -- end
+--
+-- LuaRocks (user tree) paths for Lua 5.1 / LuaJIT
+local home = vim.env.HOME
+package.path = package.path
+  .. ";" .. home .. "/.luarocks/share/lua/5.1/?.lua"
+  .. ";" .. home .. "/.luarocks/share/lua/5.1/?/init.lua"
+
+package.cpath = package.cpath
+  .. ";" .. home .. "/.luarocks/lib/lua/5.1/?.so"
+
 
 vim.keymap.set('n', '<C-h>', '<C-w><C-h>', { desc = 'Move focus to the left window' })
 vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right window' })
@@ -1041,10 +1051,19 @@ require('lazy').setup({
   require 'custom.plugins.mlir',
   require 'custom.plugins.oil',
   require 'custom.plugins.harpoon',
+  require 'custom.plugins.copilot-chat',
   require 'custom.plugins.vim-tmux-navigator',
   require 'custom.plugins.Catppuccin',
   require 'custom.plugins.telescope-undo',
-  -- require 'custom.plugins.copilot',
+  require 'custom.plugins.chat_yank'.setup({
+    register = "+",
+    map ={
+      yank_block = "<leader>yc",
+    }
+
+  }),
+  require 'custom.plugins.copilot-topics'.setup(),
+
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the

@@ -17,7 +17,7 @@ function M.get_last_edit_time()
       local pattern = '(%d+)%-(%d+)%-(%d+)%s+(%d+):(%d+):(%d+)'
       local y, m, d, H, M_, S = date_str:match(pattern)
       if y then
-        return os.time { year = y, month = m, day = d, hour = H, min = M_, sec = S }
+        return os.time { year = y, month = m, day = d, hour = H, min = M_, sec = S },{year=y,month=m,day=d}
       end
     end
   end
@@ -25,14 +25,20 @@ function M.get_last_edit_time()
   return nil
 end
 
+function M.is_today(last_date)
+  if not last_date then return false end
+  local now = os.date("*t")
+  return tonumber(last_date.year) == now.year and tonumber(last_date.month) == now.month and tonumber(last_date.day) == now.day
+end
+
 function M.check_journal()
-  local last_edit = M.get_last_edit_time()
+  local last_edit , last_date = M.get_last_edit_time()
   if last_edit == nil then
     return nil
   end
   local now = os.time()
 
-  if not last_edit or (now - last_edit) > M.interval then
+  if not M.is_today(last_date) then
     M.notify_journal()
   end
 end
