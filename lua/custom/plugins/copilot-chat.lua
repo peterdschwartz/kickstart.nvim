@@ -12,7 +12,7 @@ return {
         layout = 'vertical', -- 'vertical', 'horizontal', 'float'
         width = 0.5, -- 50% of screen width
       },
-      auto_insert_mode = true, -- Enter insert mode when opening
+      auto_insert_mode = false,
       init = function()
         vim.api.nvim_create_autocmd('FileType', {
           pattern = 'copilot-chat',

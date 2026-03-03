@@ -117,12 +117,6 @@ local greek_map = {
   omega = 'ω',
 }
 
--- for name, char in pairs(greek_map) do
---   vim.keymap.set('i', '\\' .. name .. ' ', function()
---     return string.rep('<BS>', #name + 1) .. char .. ' '
---   end, { expr = true, noremap = true })
--- end
---
 -- LuaRocks (user tree) paths for Lua 5.1 / LuaJIT
 local home = vim.env.HOME
 package.path = package.path
@@ -1096,6 +1090,21 @@ vim.api.nvim_create_user_command('JournalOpen', journal.open_journal, {})
 
 local regex_select = require 'custom.plugins.regex-select.regex-multi-select'
 vim.api.nvim_create_user_command('RegexSelect', regex_select.regex_live_preview, { range = true })
+
+local copilot_chat = require('custom.plugins.copilot-chat')
+vim.keymap.set('n', '<leader>ct',"<cmd>CopilotChatToggle<CR>", { desc = 'Toggle CopilotChat' })
+
+vim.api.nvim_create_user_command("GitDiffBuf", function(opts)
+  local args = vim.split(opts.args, " ")
+  if #args ~= 2 then
+    print("Usage: :GitDiffBuf <old> <new>")
+    return
+  end
+  local old, new = args[1], args[2]
+  vim.cmd("tabnew")
+  vim.cmd("0read !git diff " .. old .. " " .. new)
+  vim.bo.filetype = "diff"
+end, {nargs='*'})
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

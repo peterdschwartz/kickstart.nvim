@@ -99,7 +99,6 @@ function M.regex_live_preview()
       if s and e then
         local current = vim.fn.getreg 'a'
         local newreg = current .. line:sub(s + 1, e) .. '\n'
-        print('Yanked: ', newreg)
         vim.fn.setreg('a', newreg)
       end
     end
