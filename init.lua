@@ -939,7 +939,7 @@ require('lazy').setup({
       -- Load the colorscheme here.
       -- Like many other themes, this one has different styles, and you could load
       -- any other, such as 'tokyonight-storm', 'tokyonight-moon', or 'tokyonight-day'.
-      vim.cmd.colorscheme 'catppuccin-mocha'
+      -- vim.cmd.colorscheme 'catppuccin-mocha'
 
       -- You can configure highlights by doing something like:
       vim.cmd.hi 'Comment gui=none'
@@ -1047,7 +1047,8 @@ require('lazy').setup({
   require 'custom.plugins.harpoon',
   require 'custom.plugins.copilot-chat',
   require 'custom.plugins.vim-tmux-navigator',
-  require 'custom.plugins.Catppuccin',
+  -- require 'custom.plugins.Catppuccin',
+  require 'custom.plugins.nordic',
   require 'custom.plugins.telescope-undo',
   require 'custom.plugins.chat_yank'.setup({
     register = "+",
@@ -1093,7 +1094,6 @@ vim.api.nvim_create_user_command('RegexSelect', regex_select.regex_live_preview,
 
 local copilot_chat = require('custom.plugins.copilot-chat')
 vim.keymap.set('n', '<leader>ct',"<cmd>CopilotChatToggle<CR>", { desc = 'Toggle CopilotChat' })
-
 vim.api.nvim_create_user_command("GitDiffBuf", function(opts)
   local args = vim.split(opts.args, " ")
   if #args ~= 2 then
@@ -1105,6 +1105,15 @@ vim.api.nvim_create_user_command("GitDiffBuf", function(opts)
   vim.cmd("0read !git diff " .. old .. " " .. new)
   vim.bo.filetype = "diff"
 end, {nargs='*'})
+
+local function vsplit_ratio(ratio)
+  local width = math.floor(vim.o.columns * ratio)
+  vim.cmd("vertical resize " .. width)
+end
+
+vim.keymap.set("n", "<leader>5", function() vsplit_ratio(0.5) end) -- 50:50
+vim.keymap.set("n", "<leader>7", function() vsplit_ratio(0.75) end) -- 75:25
+vim.keymap.set("n", "<leader>3", function() vsplit_ratio(0.25) end) -- 25:75
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et
