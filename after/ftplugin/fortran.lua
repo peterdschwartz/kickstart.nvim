@@ -33,7 +33,7 @@ local function close_fortran_block()
 
   kw = kw:lower()
   local end_kw
-  if kw == 'type' or kw == 'class' then
+  if kw == 'type' then
     end_kw = 'type'
   elseif kw == 'subroutine' then
     end_kw = 'subroutine'
@@ -48,12 +48,52 @@ local function close_fortran_block()
 
   local end_line = string.format('%send %s %s', indent, end_kw, name)
 
-  -- insert the "end ..." on the line *below* the current one
   vim.api.nvim_put({ end_line }, 'l', true, true)
 end
 
 -- Map it: <leader>fe in normal mode to close the current block
 vim.keymap.set('n', '<leader>fe', close_fortran_block, { buffer = true, desc = 'Insert matching end ... name' })
+
+local function init_fortran_module(name)
+  name = vim.trim(name or "")
+
+  if name == "" then
+    vim.notify("Usage: FortranModule <module_name>", vim.log.levels.ERROR)
+    return
+  end
+
+  if not name:match("^%a[%w_]*$") then
+    vim.notify("Invalid Fortran module name: " .. name, vim.log.levels.ERROR)
+    return
+  end
+
+  local lines = {
+    "module " .. name,
+    "  implicit none",
+    "  private",
+    "",
+    "contains",
+    "",
+    "end module " .. name,
+  }
+
+  local buf = vim.api.nvim_get_current_buf()
+  local current_lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+
+  if #current_lines == 1 and current_lines[1] == "" then
+    vim.api.nvim_buf_set_lines(buf, 0, -1, false, lines)
+  else
+    local row = vim.api.nvim_win_get_cursor(0)[1]
+    vim.api.nvim_buf_set_lines(buf, row, row, false, lines)
+  end
+end
+
+vim.api.nvim_buf_create_user_command(0, "FortranModule", function(opts)
+  init_fortran_module(opts.args)
+end, {
+  nargs = 1,
+  desc = "Insert Fortran module scaffold",
+})
 
 -- require('lspconfig').fortls.setup {
 --   settings = {
