@@ -23,7 +23,19 @@ vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
-
+vim.opt.mousescroll = "ver:0,hor:0"
+--
+local scroll_enabled = false
+vim.keymap.set("n", "<leader>tm", function()
+  scroll_enabled = not scroll_enabled
+  if scroll_enabled then
+    vim.opt.mousescroll = "ver:3,hor:6"
+  else
+    vim.opt.mousescroll = "ver:0,hor:0"
+  end
+  vim.notify("Neovim mouse " .. (scroll_enabled and "enabled" or "disabled"))
+end, { desc = "Toggle mouse input" })
+--
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
@@ -972,6 +984,7 @@ require('lazy').setup({
   require 'custom.plugins.nordic',
   -- require 'custom.plugins.pink-panic',
   require 'custom.plugins.telescope-undo',
+  require 'custom.plugins.render-markdown',
   require('custom.plugins.chat_yank').setup {
     register = '+',
     map = {
